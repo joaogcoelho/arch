@@ -26,6 +26,12 @@ class _ViewProductsPageState extends State<ViewProductsPage> {
   }
 
   @override
+  void dispose() {
+    searchProductsStore.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('View Products')),

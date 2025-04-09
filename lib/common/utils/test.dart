@@ -6,9 +6,12 @@ class MockResult<T> {
   final List<Result<Exception, T>> _results = [];
   Result<Exception, T>? _defaultValue;
   int _callCount = 0;
+  int _totalItens = 0;
 
-  void returnOnce(Result<Exception, T> result) {
+  MockResult<T> returnOnce(Result<Exception, T> result) {
     _results.add(result);
+    _totalItens++;
+    return this;
   }
 
   void returnAll(List<Result<Exception, T>> results) {
@@ -27,19 +30,24 @@ class MockResult<T> {
   }
 
   Result<Exception, T> next() {
-    if (_callCount < _results.length) {
-      return _results[_callCount++];
-    }
     if (_defaultValue != null) {
-      _callCount++;
       return _defaultValue!;
     }
+
+    if (_callCount < _totalItens) {
+      _callCount++;
+      return _results.removeAt(0);
+    }
+
     throw StateError('No more mock results and no default set');
   }
 }
 
 extension OnWidgetTester on WidgetTester {
   Future<void> pumpWidgetMaterial(Widget widget) async {
+    await pumpWidget(const SizedBox.shrink());
+    await pumpAndSettle();
+
     await pumpWidget(MaterialApp(home: widget));
     await pumpAndSettle();
   }
