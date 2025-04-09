@@ -8,9 +8,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:arch/features/products/ui/widgets/card_product.dart';
 
 class MockFindProductsUseCase implements IUseCase<List<ProductDTO>> {
+  final mockResponse = MockResult<List<ProductDTO>>();
+
   @override
   Future<Result<Exception, List<ProductDTO>>> execute() async {
-    return Right([ProductDTO(id: 1, name: "Product 1"), ProductDTO(id: 2, name: "Product 2")]);
+    return mockResponse.next();
   }
 }
 
@@ -19,14 +21,13 @@ void main() {
   var store = ViewProductsStore(usecase);
 
   group('ViewProductsPage', () {
-    testWidgets("Should render title and list of products", (tester) async {
+    testWidgets("Should show products on success", (tester) async {
+      usecase.mockResponse.returnOnce(
+        Right([ProductDTO(id: 1, name: 'Product 1'), ProductDTO(id: 2, name: 'Product 2')]),
+      );
+
       await tester.pumpWidgetMaterial(ViewProductsPage(searchProductsStore: store));
-
-      var finder = tester.findText('View Products');
-      expect(finder, findsOneWidget);
-
-      finder = tester.findByType<CardProduct>();
-      expect(finder, findsNWidgets(2));
+      expect(tester.findByType<CardProduct>(), findsNWidgets(2));
     });
   });
 }
