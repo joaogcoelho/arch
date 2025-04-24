@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class BaseStore extends ChangeNotifier {
+class BaseController extends ChangeNotifier {
   bool loading = false;
 
   _setLoading(bool value) {

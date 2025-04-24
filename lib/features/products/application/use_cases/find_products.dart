@@ -1,22 +1,28 @@
-import 'package:arch/common/interfaces/http_client.dart';
-import 'package:arch/common/interfaces/use_case.dart';
 import 'package:arch/common/utils/result.dart';
 import 'package:arch/core/domain/dtos/product.dart';
+import 'package:arch/features/products/domain/repositories/product_repository.dart';
 
-class FindProductsUseCase implements IUseCase<List<ProductDTO>> {
-  final IHttpClient _httpClient;
-  FindProductsUseCase(this._httpClient);
+class FindProductsUseCase {
+  final IProductRepository _productsRepository;
+  FindProductsUseCase(this._productsRepository);
 
-  @override
-  Future<Result<Exception, List<ProductDTO>>> execute() async {
-    final response = await _httpClient.get("/api/products");
-    if (response.statusCode != 200) {
-      return Left(Exception("Failed to load products"));
-    }
-    return Right(_parseResponse(response.data));
+  Future<Result<List<ProductDTO>>> execute(Teste props) {
+    return _productsRepository.findProducts(props);
   }
+}
 
-  List<ProductDTO> _parseResponse(List<Map<String, dynamic>> response) {
-    return response.map<ProductDTO>((product) => ProductDTO.fromJson(product)).toList();
-  }
+class Teste {
+  int page;
+  int actualPage;
+  String name;
+
+  Teste({required this.page, required this.actualPage, this.name = "ass"});
+}
+
+class TesteDTO {
+  int page;
+  int actualPage;
+  String name;
+
+  TesteDTO({required this.page, required this.actualPage, this.name = "ass"});
 }

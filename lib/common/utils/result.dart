@@ -1,34 +1,37 @@
-abstract class Result<L, R> {
-  T fold<T>(T Function(L l) leftFn, T Function(R r) rightFn);
+abstract class Result<T> {
+  R fold<R>(R Function(Exception e) onError, R Function(T data) onSuccess);
 
-  bool isLeft() => this is Left<L, R>;
-  bool isRight() => this is Right<L, R>;
+  bool isError() => this is Error<T>;
+  bool isSuccess() => this is Success<T>;
+
+  T? getOrNull() => isSuccess() ? (this as Success<T>).value : null;
+
+  T getOrThrow() {
+    if (isSuccess()) {
+      return (this as Success<T>).value;
+    } else {
+      throw (this as Error<T>).exception;
+    }
+  }
+
+  T getOrDefault(T defaultValue) => isSuccess() ? (this as Success<T>).value : defaultValue;
 }
 
-class Left<L, R> extends Result<L, R> {
-  final L value;
-  Left(this.value);
+class Success<T> extends Result<T> {
+  final T value;
+  Success(this.value);
 
   @override
-  T fold<T>(T Function(L l) leftFn, T Function(R r) rightFn) => leftFn(value);
-
-  @override
-  bool isLeft() => true;
-
-  @override
-  bool isRight() => false;
+  R fold<R>(R Function(Exception e) onError, R Function(T data) onSuccess) => onSuccess(value);
 }
 
-class Right<L, R> extends Result<L, R> {
-  final R value;
-  Right(this.value);
+class Error<T> extends Result<T> {
+  final Exception exception;
+  Error(this.exception);
 
   @override
-  T fold<T>(T Function(L l) leftFn, T Function(R r) rightFn) => rightFn(value);
-
-  @override
-  bool isLeft() => false;
-
-  @override
-  bool isRight() => true;
+  R fold<R>(R Function(Exception e) onError, R Function(T data) onSuccess) => onError(exception);
 }
+
+Result<T> right<T>(T value) => Success<T>(value);
+Result<T> left<T>(Exception exception) => Error<T>(exception);
